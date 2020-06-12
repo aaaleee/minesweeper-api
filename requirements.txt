@@ -3,3 +3,4 @@ datetime
 uuid
 Flask-SQLAlchemy
 PyJWT
+python-dotenv
