@@ -92,7 +92,7 @@ def authenticate():
 @jwt_required
 def new_game(current_user):
    service = GameService()
-   service.start_game()
-   service.game.user_id = current_user.id 
-   
+   service.start_game(current_user.id)
+   db.session.add(service.game)
+   db.session.commit()
    return jsonify(service.encode_game_info())
