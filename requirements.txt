@@ -5,3 +5,4 @@ Flask-SQLAlchemy
 PyJWT
 python-dotenv
 marshmallow
+pytest
