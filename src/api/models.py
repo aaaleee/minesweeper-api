@@ -18,5 +18,6 @@ class Game(db.Model):
     columns = db.Column(db.Integer, nullable=False)
     mines_left = db.Column(db.Integer, nullable=False)
     start_time = db.Column(db.DateTime)
+    end_time = db.Column(db.DateTime)
     status = db.Column(db.Enum("started", "won", "lost"), nullable=False, default="started")
     board = db.Column(db.JSON, nullable=False)
