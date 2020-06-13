@@ -16,6 +16,7 @@ from schemas.authentication import Authentication
 from sqlalchemy.exc import IntegrityError
 
 from models import db, User, Game
+from services.game_service import GameService
 
 app = Flask(__name__)
 
@@ -38,10 +39,10 @@ def jwt_required(f):
          return jsonify({"message": "Missing token."})
 
       try:
-         data = jwt.decode(token, app.config[SECRET_KEY])
+         data = jwt.decode(token, app.config["SECRET_KEY"])
          current_user = User.query.filter_by(email=data["email"]).first()
       except:
-         return jsonify({"message": "Invalid token."})
+         return {"message": "Invalid token."}, 401
 
       return f(current_user, *args, **kwargs)
    return decorator
@@ -85,3 +86,13 @@ def authenticate():
       return {'token' : token.decode('UTF-8')}
    else:
       return {"message": "Authentication failed."}, 401
+
+
+@app.route("/game", methods=["POST"])
+@jwt_required
+def new_game(current_user):
+   service = GameService()
+   service.start_game()
+   service.game.user_id = current_user.id 
+   
+   return jsonify(service.encode_game_info())
