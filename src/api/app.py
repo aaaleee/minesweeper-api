@@ -39,13 +39,13 @@ def jwt_required(f):
          token = request.headers["x-access-tokens"]
 
       if not token:
-         return jsonify({"message": "Missing token"})
+         return jsonify({"message": "Missing token."})
 
       try:
          data = jwt.decode(token, app.config[SECRET_KEY])
          current_user = Users.query.filter_by(email=data["email"]).first()
       except:
-         return jsonify({"message": "Invalid token"})
+         return jsonify({"message": "Invalid token."})
 
       return f(current_user, *args, **kwargs)
    return decorator
@@ -70,7 +70,7 @@ def register():
       user_data = {"id": user.id, "email": user.email}
       return jsonify({"message": "Registered successfully", "user": user_data})
    except IntegrityError as err:
-      return {"email": "That email is already registered"}
+      return {"email": "That email is already registered."}, 400
 
 
 @app.route("/authenticate", methods=["POST"])
@@ -88,4 +88,4 @@ def authenticate():
       token = jwt.encode({'email': user.email, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(days=30)}, app.config['SECRET_KEY'])
       return {'token' : token.decode('UTF-8')}
    else:
-      return {"message": "Authentication failed"}, 401
+      return {"message": "Authentication failed."}, 401
