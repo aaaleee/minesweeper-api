@@ -5,6 +5,7 @@ from models import Game
 
 def get_mock_game():
     mock_game = Game()
+    mock_game.id = 1337
     mock_game.status = "started"
     mock_game.user_id = 1
     return mock_game
@@ -109,5 +110,14 @@ def test_mask_board():
     assert masked[3][3]=="C"
 
 
+def test_encode_game_info():
+    service = GameService(get_mock_game())
+    service._generate_board()
+    encoded = service.encode_game_info()
 
+    assert isinstance(encoded["board"], list)
+    assert encoded["status"] == "started"
+    assert encoded["mines_left"] == 5
+    assert encoded["id"] == 1337
+    
 
