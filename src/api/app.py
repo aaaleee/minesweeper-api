@@ -30,6 +30,16 @@ class Users(db.Model):
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(255))
 
+class Game(db.Model):
+   id = db.Column(db.Integer, primary_key=True)
+   user_id = db.Column(db.Integer, nullable=False)
+   rows = db.Column(db.Integer, nullable=False)
+   columns = db.Column(db.Integer, nullable=False)
+   mines_left = db.Column(db.Integer, nullable=False)
+   start_time = db.Column(db.DateTime)
+   status = db.Column(db.Enum("Started", "Won", "Lost"), nullable=False, default="Started")
+   board = db.Column(db.JSON, nullable=False)
+
 
 def jwt_required(f):
    @wraps(f)
