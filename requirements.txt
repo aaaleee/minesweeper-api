@@ -4,3 +4,4 @@ uuid
 Flask-SQLAlchemy
 PyJWT
 python-dotenv
+marshmallow
