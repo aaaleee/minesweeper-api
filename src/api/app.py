@@ -101,6 +101,16 @@ def new_game(current_user):
 @app.route("/games/<id>", methods=["GET"])
 @jwt_required
 def retrieve_game(current_user, id):
-   game = Game.query.filter_by(id=id).first()
+   game = Game.query.filter_by(id=id, user_id=current_user.id).first()
    service = GameService(game)
    return jsonify(service.encode_game_info())
+
+
+@app.route("/games", methods=["GET"])
+@jwt_required
+def list_games(current_user):
+   games = Game.query.filter_by(user_id=current_user.id).all()
+   all_games = []
+   for game in games:
+      all_games.append({"id": game.id, "status": game.status})
+   return {"games": all_games}

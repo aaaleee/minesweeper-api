@@ -37,6 +37,10 @@ def retrieve_game(client, game_id: int):
     token = get_token(client, "ale@gmail.com", "bananasurf123")
     return client.get(f'/games/{game_id}', headers={"x-access-tokens": token})
 
+def list_games(client):
+    token = get_token(client, "ale@gmail.com", "bananasurf123")
+    return client.get(f'/games', headers={"x-access-tokens": token})
+
 def test_register(client):
     response = register(client, "ale@gmail.com", "bananasurf123")
     assert response.status_code==200
@@ -94,3 +98,12 @@ def test_retrieve_game(client):
 
     assert response.json["id"] == game_id
     assert "board" in response.json
+
+def test_list_games(client):
+    response = list_games(client)
+
+    assert "games" in response.json
+    first = response.json["games"][0]
+    assert "id" in first and isinstance(first["id"], int)
+    assert "status" in first
+
