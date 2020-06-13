@@ -31,11 +31,11 @@ def get_token(client, email: str, password: str):
 
 def start_game(client):
     token = get_token(client, "ale@gmail.com", "bananasurf123")
-    return client.post('/game',headers={"x-access-tokens": token})
+    return client.post('/games',headers={"x-access-tokens": token})
 
 def retrieve_game(client, game_id: int):
     token = get_token(client, "ale@gmail.com", "bananasurf123")
-    return client.get(f'/game/{game_id}', headers={"x-access-tokens": token})
+    return client.get(f'/games/{game_id}', headers={"x-access-tokens": token})
 
 def test_register(client):
     response = register(client, "ale@gmail.com", "bananasurf123")

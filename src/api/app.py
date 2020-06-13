@@ -89,7 +89,7 @@ def authenticate():
       return {"message": "Authentication failed."}, 401
 
 
-@app.route("/game", methods=["POST"])
+@app.route("/games", methods=["POST"])
 @jwt_required
 def new_game(current_user):
    service = GameService()
@@ -98,7 +98,7 @@ def new_game(current_user):
    db.session.commit()
    return jsonify(service.encode_game_info())
 
-@app.route("/game/<id>", methods=["GET"])
+@app.route("/games/<id>", methods=["GET"])
 @jwt_required
 def retrieve_game(current_user, id):
    game = Game.query.filter_by(id=id).first()
