@@ -15,6 +15,8 @@ from schemas.user_registration import UserRegistration
 from schemas.authentication import Authentication
 from sqlalchemy.exc import IntegrityError
 
+from models import db, User, Game
+
 app = Flask(__name__)
 
 load_dotenv(join(dirname(__file__), "../../.env"))
@@ -23,23 +25,7 @@ app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = os.getenv("SQLALCHEMY_TRACK_MODIFICATIONS")
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
 
-db = SQLAlchemy(app)
-
-class Users(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100), unique=True)
-    password = db.Column(db.String(255))
-
-class Game(db.Model):
-   id = db.Column(db.Integer, primary_key=True)
-   user_id = db.Column(db.Integer, nullable=False)
-   rows = db.Column(db.Integer, nullable=False)
-   columns = db.Column(db.Integer, nullable=False)
-   mines_left = db.Column(db.Integer, nullable=False)
-   start_time = db.Column(db.DateTime)
-   status = db.Column(db.Enum("Started", "Won", "Lost"), nullable=False, default="Started")
-   board = db.Column(db.JSON, nullable=False)
-
+db.init_app(app)
 
 def jwt_required(f):
    @wraps(f)
@@ -53,7 +39,7 @@ def jwt_required(f):
 
       try:
          data = jwt.decode(token, app.config[SECRET_KEY])
-         current_user = Users.query.filter_by(email=data["email"]).first()
+         current_user = User.query.filter_by(email=data["email"]).first()
       except:
          return jsonify({"message": "Invalid token."})
 
@@ -74,7 +60,7 @@ def register():
    hashed_password = generate_password_hash(data["password"], method="sha256")
 
    try:
-      user = Users(email=data["email"], password=hashed_password)
+      user = User(email=data["email"], password=hashed_password)
       db.session.add(user)
       db.session.commit()
       user_data = {"id": user.id, "email": user.email}
@@ -93,7 +79,7 @@ def authenticate():
    except ValidationError as err:
       return jsonify(err.messages), 400
    
-   user = Users.query.filter_by(email=data["email"]).first()
+   user = User.query.filter_by(email=data["email"]).first()
    if user and check_password_hash(user.password,data["password"]):
       token = jwt.encode({'email': user.email, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(days=30)}, app.config['SECRET_KEY'])
       return {'token' : token.decode('UTF-8')}
