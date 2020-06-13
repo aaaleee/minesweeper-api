@@ -39,7 +39,11 @@ def retrieve_game(client, game_id: int):
 
 def list_games(client):
     token = get_token(client, "ale@gmail.com", "bananasurf123")
-    return client.get(f'/games', headers={"x-access-tokens": token})
+    return client.get('/games', headers={"x-access-tokens": token})
+
+def clear_cell(client, game_id: int, row:int, column:int):
+    token = get_token(client, "ale@gmail.com", "bananasurf123")
+    return client.post(f'/games/{game_id}/clear',json={"row": row, "column": column}, headers={"x-access-tokens": token})
 
 def test_register(client):
     response = register(client, "ale@gmail.com", "bananasurf123")
@@ -107,3 +111,18 @@ def test_list_games(client):
     assert "id" in first and isinstance(first["id"], int)
     assert "status" in first
 
+def test_clear_cell(client):
+    response = start_game(client)
+    game_id = response.json["id"]
+
+    game_data = retrieve_game(client, game_id)
+    initial_board = game_data.json["board"]
+    
+    clear_response = clear_cell(client, game_id, 0, 0)
+    print(clear_response.json)
+    new_board = clear_response.json["board"]
+
+    assert initial_board[0][0] != new_board[0][0]
+    assert new_board[0][0] != "C"
+
+    

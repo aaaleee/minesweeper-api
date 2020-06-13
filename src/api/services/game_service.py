@@ -1,5 +1,14 @@
 import random
+import datetime
 from models import db,Game
+
+class GameException(Exception):
+    def __init__(self, game, msg=None):
+        super().__init__(msg)
+        self.game = game
+
+class InvalidClearException(GameException):
+    pass
 
 class GameService:
 
@@ -12,6 +21,51 @@ class GameService:
         self.game.status = "started"
         self.game.user_id = user_id
         self._generate_board()
+
+    def clear(self, row: int, column: int):
+        if self.game.status != "started":
+            raise InvalidClearException(game, "Cannot clear cells on an inactive game")
+        if row not in range(self.game.rows) or column not in range(self.game.columns):
+            raise InvalidClearException(game, "Cannot clear cells outside of minefield")
+        
+        if not self.game.start_time:
+            self.game.start_time = datetime.datetime.utcnow()
+        
+        if self.game.board[row][column]["status"] in  ("U","F"):
+            return
+        
+        if self.game.board[row][column]["value"]==-1:
+            self.game.board[row][column]["status"] = "U"
+            self.game.status = "lost"
+            self.game.end_time = datetime.datetime.utcnow()
+        else:
+            self._clear_adjacents(row, column)
+            if self.is_complete():
+                self.game.status = "won"
+                self.game.end_time = datetime.datetime.utcnow()
+
+
+    def _clear_adjacents(self, row: int, column:int):
+        if row<0 or column<0 or row>=self.game.rows or column>=self.game.columns:
+            return
+        if self.game.board[row][column]["status"] in ("U","F"):
+            return
+        cell_value = self.game.board[row][column]["value"]
+        if cell_value != -1:
+            self.game.board[row][column]["status"] = "U"
+            if cell_value == 0:
+                for r in range(row-1, row+2):
+                    for c in range(column-1,column+2):
+                        if not (r==row and c==column):
+                            self._clear_adjacents(r, c)
+
+    def is_complete(self):
+        for row in self.game.board:
+            for column in row:
+                if column["value"] !=-1 and column["status"] != "U":
+                    return False
+        return True
+        
 
     def _generate_board(self, rows:int = 10, columns: int = 10, mines: int = 5):
         #TODO: check that mine count does not exceed (rows*columns)-1

@@ -13,10 +13,11 @@ from dotenv import load_dotenv
 from marshmallow import ValidationError
 from schemas.user_registration import UserRegistration
 from schemas.authentication import Authentication
+from schemas.cell_action import CellAction
 from sqlalchemy.exc import IntegrityError
 
 from models import db, User, Game
-from services.game_service import GameService
+from services.game_service import GameService, InvalidClearException
 
 app = Flask(__name__)
 
@@ -114,3 +115,28 @@ def list_games(current_user):
    for game in games:
       all_games.append({"id": game.id, "status": game.status})
    return {"games": all_games}
+
+
+@app.route("/games/<id>/clear", methods=["POST"])
+@jwt_required
+def clear(current_user, id):
+   data = request.get_json()
+   schema = CellAction()
+   game = Game.query.filter_by(id=id, user_id=current_user.id).first()
+   service = GameService(game)
+
+   try:
+      coords = schema.load(data)
+   except ValidationError as err:
+      return jsonify(err.messages), 400
+   
+   try:
+      service.clear(coords["row"], coords["column"])
+      st = service.game.start_time
+      board = service.game.board
+      db.session.query(Game).update({"start_time": st, "board": board})
+      db.session.commit()
+   except InvalidClearException as exc:
+      return {"message": exc.message}, 400
+   
+   return jsonify(service.encode_game_info())
