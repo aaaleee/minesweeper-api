@@ -25,6 +25,17 @@ def authenticate(client, email: str, password: str):
         password=password
     ), follow_redirects=True)
 
+def get_token(client, email: str, password: str):
+    response = authenticate(client, "ale@gmail.com", "bananasurf123")
+    return response.json["token"]
+
+def start_game(client):
+    token = get_token(client, "ale@gmail.com", "bananasurf123")
+    return client.post('/game',headers={"x-access-tokens": token})
+
+def retrieve_game(client, game_id: int):
+    token = get_token(client, "ale@gmail.com", "bananasurf123")
+    return client.get(f'/game/{game_id}', headers={"x-access-tokens": token})
 
 def test_register(client):
     response = register(client, "ale@gmail.com", "bananasurf123")
@@ -67,3 +78,19 @@ def test_authenticate_missing_credentials(client):
     assert response.status_code == 400
     assert "Field may not be null." in response.json["email"]
     assert "Field may not be null." in response.json["password"]
+
+
+def test_start_new_game(client):
+    response = start_game(client)
+    assert "id" in response.json
+    assert "board" in response.json
+    assert response.json["status"] == "started"
+
+def test_retrieve_game(client):
+    response = start_game(client)
+    game_id = response.json["id"]
+    
+    response = retrieve_game(client, game_id)
+
+    assert response.json["id"] == game_id
+    assert "board" in response.json

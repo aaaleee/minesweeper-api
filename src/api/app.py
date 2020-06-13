@@ -39,7 +39,8 @@ def jwt_required(f):
          return jsonify({"message": "Missing token."})
 
       try:
-         data = jwt.decode(token, app.config["SECRET_KEY"])
+         algos = jwt.algorithms.get_default_algorithms()
+         data = jwt.decode(token, key=app.config["SECRET_KEY"], algorithms=algos)
          current_user = User.query.filter_by(email=data["email"]).first()
       except:
          return {"message": "Invalid token."}, 401
@@ -95,4 +96,11 @@ def new_game(current_user):
    service.start_game(current_user.id)
    db.session.add(service.game)
    db.session.commit()
+   return jsonify(service.encode_game_info())
+
+@app.route("/game/<id>", methods=["GET"])
+@jwt_required
+def retrieve_game(current_user, id):
+   game = Game.query.filter_by(id=id).first()
+   service = GameService(game)
    return jsonify(service.encode_game_info())
