@@ -67,7 +67,6 @@ def register():
       db.session.add(user)
       db.session.commit()
       user_data = {"id": user.id, "email": user.email}
+      return jsonify({"message": "Registered successfully", "user": user_data})
    except IntegrityError as err:
       return {"email": "That email is already registered"}
-
-   return jsonify({"message": "Registered successfully", "user": user_data})
