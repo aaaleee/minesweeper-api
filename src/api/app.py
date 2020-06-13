@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 
 from marshmallow import ValidationError
 from schemas.user_registration import UserRegistration
+from schemas.authentication import Authentication
 from sqlalchemy.exc import IntegrityError
 
 app = Flask(__name__)
@@ -70,3 +71,21 @@ def register():
       return jsonify({"message": "Registered successfully", "user": user_data})
    except IntegrityError as err:
       return {"email": "That email is already registered"}
+
+
+@app.route("/authenticate", methods=["POST"])
+def authenticate():
+   data = request.get_json()
+   schema = Authentication()
+
+   try:
+      result = schema.load(data)
+   except ValidationError as err:
+      return jsonify(err.messages), 400
+   
+   user = Users.query.filter_by(email=data["email"]).first()
+   if user and check_password_hash(user.password,data["password"]):
+      token = jwt.encode({'email': user.email, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(days=30)}, app.config['SECRET_KEY'])
+      return {'token' : token.decode('UTF-8')}
+   else:
+      return {"message": "Authentication failed"}, 401
