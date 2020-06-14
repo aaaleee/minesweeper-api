@@ -18,6 +18,7 @@ from sqlalchemy.exc import IntegrityError
 
 from models import db, User, Game
 from services.game_service import GameService, InvalidClearException
+from exceptions import InvalidClearException, GameNotFoundException
 
 app = Flask(__name__)
 
@@ -49,6 +50,11 @@ def jwt_required(f):
       return f(current_user, *args, **kwargs)
    return decorator
 
+def find_game(user_id: int, game_id: int):
+   game = Game.query.filter_by(id=game_id, user_id=user_id).first()
+   if not game:
+      raise GameNotFoundException(None, f"Game with ID {game_id} not found.")
+   return game
 
 @app.route("/register", methods=["POST"])
 def register():
@@ -102,8 +108,12 @@ def new_game(current_user):
 @app.route("/games/<id>", methods=["GET"])
 @jwt_required
 def retrieve_game(current_user, id):
-   game = Game.query.filter_by(id=id, user_id=current_user.id).first()
-   service = GameService(game)
+   try:
+      game = find_game(current_user.id, id)
+      service = GameService(game)
+   except GameNotFoundException as gnf:
+      return jsonify(gnf.message), 404
+
    return jsonify(service.encode_game_info())
 
 
@@ -122,8 +132,11 @@ def list_games(current_user):
 def clear(current_user, id):
    data = request.get_json()
    schema = CellAction()
-   game = Game.query.filter_by(id=id, user_id=current_user.id).first()
-   service = GameService(game)
+   try:
+      game = find_game(current_user.id, id)
+      service = GameService(game)
+   except GameNotFoundException as gnf:
+      return jsonify(gnf.message), 404
 
    try:
       coords = schema.load(data)
@@ -147,8 +160,11 @@ def clear(current_user, id):
 def toggle(current_user, id):
    data = request.get_json()
    schema = CellAction()
-   game = Game.query.filter_by(id=id, user_id=current_user.id).first()
-   service = GameService(game)
+   try:
+      game = find_game(current_user.id, id)
+      service = GameService(game)
+   except GameNotFoundException as gnf:
+      return jsonify(gnf.message), 404
 
    try:
       coords = schema.load(data)

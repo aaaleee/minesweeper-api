@@ -1,14 +1,7 @@
 import random
 import datetime
-from models import db,Game
-
-class GameException(Exception):
-    def __init__(self, game, msg=None):
-        super().__init__(msg)
-        self.game = game
-
-class InvalidClearException(GameException):
-    pass
+from models import db, Game
+from exceptions import InvalidClearException
 
 class GameService:
 
