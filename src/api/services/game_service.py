@@ -133,6 +133,7 @@ class GameService:
         return {
             "id": self.game.id,
             "start_time": self.game.start_time,
+            "end_time": self.game.end_time,
             "mines_left": self.game.mines_left,
             "status": self.game.status,
             "board": self._mask_board()
