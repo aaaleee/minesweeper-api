@@ -121,3 +121,32 @@ def test_encode_game_info():
     assert encoded["id"] == 1337
     
 
+def test_toggle_covered_cell():
+    service = GameService(get_mock_game())
+    service.start_game(1)
+
+    board = service.game.board
+
+    assert board[0][0]["status"] == "C"
+    service.toggle(0, 0)
+    assert board[0][0]["status"] == "F"
+    service.toggle(0, 0)
+    assert board[0][0]["status"] == "?"
+    service.toggle(0, 0)
+    assert board[0][0]["status"] == "C"
+
+    board[0][0]["value"] = 0
+    service.clear
+
+def test_toggle_uncovered_cell_should_do_nothing():
+    service = GameService(get_mock_game())
+    service.start_game(1)
+
+    board = service.game.board
+
+    board[0][0]["value"] = 0
+    service.clear(0, 0)
+    assert board[0][0]["status"] == "U"
+    service.toggle(0, 0)
+    assert board[0][0]["status"] == "U"
+    

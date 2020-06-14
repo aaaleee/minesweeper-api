@@ -22,11 +22,16 @@ class GameService:
         self.game.user_id = user_id
         self._generate_board()
 
-    def clear(self, row: int, column: int):
+
+    def _is_cell_valid(self, row:int, column: int):
         if self.game.status != "started":
             raise InvalidClearException(game, "Cannot clear cells on an inactive game")
         if row not in range(self.game.rows) or column not in range(self.game.columns):
             raise InvalidClearException(game, "Cannot clear cells outside of minefield")
+
+
+    def clear(self, row: int, column: int):
+        self._is_cell_valid(row, column)
         
         if not self.game.start_time:
             self.game.start_time = datetime.datetime.utcnow()
@@ -58,6 +63,15 @@ class GameService:
                     for c in range(column-1,column+2):
                         if not (r==row and c==column):
                             self._clear_adjacents(r, c)
+
+
+    def toggle(self, row: int, column: int):
+        self._is_cell_valid(row, column)
+        values = ["C", "F", "?"]
+        status = self.game.board[row][column]["status"]
+        if status != "U":
+            self.game.board[row][column]["status"] = values[(values.index(status)+1) % len(values)]
+
 
     def is_complete(self):
         for row in self.game.board:
