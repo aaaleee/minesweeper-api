@@ -45,6 +45,11 @@ def clear_cell(client, game_id: int, row:int, column:int):
     token = get_token(client, "ale@gmail.com", "bananasurf123")
     return client.post(f'/games/{game_id}/clear',json={"row": row, "column": column}, headers={"x-access-tokens": token})
 
+def toggle_cell(client, game_id: int, row:int, column:int):
+    token = get_token(client, "ale@gmail.com", "bananasurf123")
+    return client.post(f'/games/{game_id}/toggle',json={"row": row, "column": column}, headers={"x-access-tokens": token})
+
+
 def test_register(client):
     response = register(client, "ale@gmail.com", "bananasurf123")
     assert response.status_code==200
@@ -119,10 +124,23 @@ def test_clear_cell(client):
     initial_board = game_data.json["board"]
     
     clear_response = clear_cell(client, game_id, 0, 0)
-    print(clear_response.json)
+    
     new_board = clear_response.json["board"]
 
     assert initial_board[0][0] != new_board[0][0]
     assert new_board[0][0] != "C"
 
+def test_toggle_cell(client):
+    response = start_game(client)
+    game_id = response.json["id"]
+
+    game_data = retrieve_game(client, game_id)
+    initial_board = game_data.json["board"]
+    
+    assert initial_board[0][0] == "C"
+    
+    toggle_response = toggle_cell(client, game_id, 0, 0)
+    new_board = toggle_response.json["board"]
+
+    assert new_board[0][0] == "F"
     

@@ -140,3 +140,28 @@ def clear(current_user, id):
       return {"message": exc.message}, 400
    
    return jsonify(service.encode_game_info())
+
+
+@app.route("/games/<id>/toggle", methods=["POST"])
+@jwt_required
+def toggle(current_user, id):
+   data = request.get_json()
+   schema = CellAction()
+   game = Game.query.filter_by(id=id, user_id=current_user.id).first()
+   service = GameService(game)
+
+   try:
+      coords = schema.load(data)
+   except ValidationError as err:
+      return jsonify(err.messages), 400
+   
+   try:
+      service.toggle(coords["row"], coords["column"])
+      st = service.game.start_time
+      board = service.game.board
+      db.session.query(Game).update({"start_time": st, "board": board})
+      db.session.commit()
+   except InvalidClearException as exc:
+      return {"message": exc.message}, 400
+   
+   return jsonify(service.encode_game_info())
