@@ -7,3 +7,4 @@ python-dotenv
 marshmallow
 pytest
 flask-swagger
+flask-cors

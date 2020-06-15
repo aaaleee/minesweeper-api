@@ -6,6 +6,7 @@ import jwt
 from flask import Flask, request, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_swagger import swagger
+from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from os.path import join, dirname
@@ -30,6 +31,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = os.getenv("SQLALCHEMY_TRACK_MODIF
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
 
 db.init_app(app)
+CORS(app)
 
 def jwt_required(f):
    @wraps(f)
