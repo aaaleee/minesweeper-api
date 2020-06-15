@@ -1,6 +1,23 @@
 Starts a new game
 ---
 description: Starts a new game
+parameters:
+    - schema:
+        id: GameSettings
+        required:
+          - rows
+          - columns
+          - mines
+        properties:
+          rows:
+            type: int
+            description: Number of board rows, must be greater than 0
+          columns:
+            type: int
+            description: Number of board columns, must be greater than 0
+          mines:
+            type: int
+            description: Number of mines, must be greater than 0 and under (rows*columns)-1
 responses:
   200:
     description: Current Game state

@@ -16,11 +16,12 @@ from marshmallow import ValidationError
 from schemas.user_registration import UserRegistration
 from schemas.authentication import Authentication
 from schemas.cell_action import CellAction
+from schemas.game_settings import GameSettings
 from sqlalchemy.exc import IntegrityError
 
 from models import db, User, Game
 from services.game_service import GameService, InvalidClearException
-from exceptions import InvalidClearException, GameNotFoundException
+from exceptions import InvalidClearException, GameNotFoundException, InvalidGameSettingsException
 
 app = Flask(__name__)
 
@@ -114,8 +115,24 @@ def new_game(current_user):
    Start a new game
    swagger_from_file: src/swagger/game_start.yml
    """
+   data = request.get_json()
+   schema = GameSettings()
+
+   try:
+      settings = schema.load(data)
+   except ValidationError as err:
+      return jsonify(err.messages), 400
+
+   rows = settings["rows"]
+   columns = settings["columns"]
+   mines =  settings["mines"]
+   
    service = GameService()
-   service.start_game(current_user.id)
+   try:
+      service.start_game(current_user.id, rows, columns, mines)
+   except InvalidGameSettingsException as exc:
+      jsonify(exc.message), 400
+
    db.session.add(service.game)
    db.session.commit()
    return jsonify(service.encode_game_info())

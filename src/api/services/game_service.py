@@ -9,14 +9,14 @@ class GameService:
         if game:
             self.game = game
     
-    def start_game(self, user_id):
+    def start_game(self, user_id: int, rows: int = 10, columns: int = 10, mines: int = 20):
         self.game = Game()
         self.game.status = "started"
         self.game.user_id = user_id
-        self._generate_board()
+        self._generate_board(rows, columns, mines)
 
 
-    def _is_cell_valid(self, row:int, column: int):
+    def _is_cell_valid(self, row: int, column: int):
         if self.game.status != "started":
             raise InvalidClearException(game, "Cannot clear cells on an inactive game")
         if row not in range(self.game.rows) or column not in range(self.game.columns):
@@ -43,7 +43,7 @@ class GameService:
                 self.game.end_time = datetime.datetime.utcnow()
 
 
-    def _clear_adjacents(self, row: int, column:int):
+    def _clear_adjacents(self, row: int, column: int):
         if row<0 or column<0 or row>=self.game.rows or column>=self.game.columns:
             return
         if self.game.board[row][column]["status"] in ("U","F"):
@@ -74,9 +74,11 @@ class GameService:
         return True
         
 
-    def _generate_board(self, rows:int = 10, columns: int = 10, mines: int = 20):
+    def _generate_board(self, rows: int, columns: int, mines: int):
         if rows*columns <= mines:
             raise InvalidGameSettingsException(self.game, "Number of mines must be less than the total board size")
+        if rows <= 0 or columns <= 0 or mines <= 0:
+            raise InvalidGameSettingsException(self.game, "All values must be greater than zero")
         self.game.rows = rows
         self.game.columns = columns
         self.game.mines_left = mines

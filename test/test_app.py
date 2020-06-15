@@ -31,7 +31,7 @@ def get_token(client, email: str, password: str):
 
 def start_game(client):
     token = get_token(client, "ale@gmail.com", "bananasurf123")
-    return client.post('/games',headers={"x-access-tokens": token})
+    return client.post('/games',headers={"x-access-tokens": token}, json={"rows": 10, "columns": 10, "mines": 20})
 
 def retrieve_game(client, game_id: int):
     token = get_token(client, "ale@gmail.com", "bananasurf123")

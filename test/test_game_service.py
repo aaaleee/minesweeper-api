@@ -46,6 +46,14 @@ def test_generate_board_should_fail_if_mine_count_greater_than_board_size():
         service._generate_board(5,5,26)
         assert e.message == "Number of mines must be less than the total board size"
 
+def test_generate_board_should_fail_if_any_input_smaller_than_1():
+    with pytest.raises(InvalidGameSettingsException) as e:
+        mock_game = get_mock_game()
+        service = GameService(mock_game)
+        service._generate_board(5,5,-26)
+        assert e.message == "All values must be greater than zero"
+
+
 def test_place_mines():
     mock_game = get_mock_game()
 
@@ -104,7 +112,7 @@ def test_calculate_values():
 def test_mask_board():
     mock_game = get_mock_game()
     service = GameService(mock_game)
-    service.start_game(1)
+    service.start_game(1, 10, 10, 20)
     board = service.game.board
     board[0][0]["status"] = "U"
     board[1][1]["status"] = "F"
@@ -120,7 +128,7 @@ def test_mask_board():
 
 def test_encode_game_info():
     service = GameService(get_mock_game())
-    service._generate_board()
+    service._generate_board(10, 10, 20)
     encoded = service.encode_game_info()
 
     assert isinstance(encoded["board"], list)
@@ -131,7 +139,7 @@ def test_encode_game_info():
 
 def test_toggle_covered_cell():
     service = GameService(get_mock_game())
-    service.start_game(1)
+    service.start_game(1, 10, 10, 20)
 
     board = service.game.board
 
@@ -148,7 +156,7 @@ def test_toggle_covered_cell():
 
 def test_toggle_uncovered_cell_should_do_nothing():
     service = GameService(get_mock_game())
-    service.start_game(1)
+    service.start_game(1, 10, 10, 20)
 
     board = service.game.board
 
