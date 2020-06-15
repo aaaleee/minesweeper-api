@@ -1,6 +1,7 @@
 import pytest
 
 from services.game_service import GameService
+from exceptions import InvalidGameSettingsException
 from models import Game
 
 def get_mock_game():
@@ -37,6 +38,13 @@ def test_generate_board():
                 covered_count += 1
 
     assert covered_count == 20*20
+
+def test_generate_board_should_fail_if_mine_count_greater_than_board_size():
+    with pytest.raises(InvalidGameSettingsException) as e:
+        mock_game = get_mock_game()
+        service = GameService(mock_game)
+        service._generate_board(5,5,26)
+        assert e.message == "Number of mines must be less than the total board size"
 
 def test_place_mines():
     mock_game = get_mock_game()
@@ -117,7 +125,7 @@ def test_encode_game_info():
 
     assert isinstance(encoded["board"], list)
     assert encoded["status"] == "started"
-    assert encoded["mines_left"] == 5
+    assert encoded["mines_left"] == 20
     assert encoded["id"] == 1337
     
 

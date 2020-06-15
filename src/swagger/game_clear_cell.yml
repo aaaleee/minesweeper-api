@@ -18,6 +18,6 @@ responses:
     schema:
       $ref: '#/definitions/ErrorMessage'
   401:
-    description: Authorization problems. Maybe the jwt token was not sent on x-access-tokens header
+    description: Auth problems. Maybe the jwt token was not sent on x-access-tokens header
     schema:
       $ref: '#/definitions/ErrorMessage'

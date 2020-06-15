@@ -1,7 +1,7 @@
 import random
 import datetime
 from models import db, Game
-from exceptions import InvalidClearException
+from exceptions import InvalidClearException, InvalidGameSettingsException
 
 class GameService:
 
@@ -74,8 +74,9 @@ class GameService:
         return True
         
 
-    def _generate_board(self, rows:int = 10, columns: int = 10, mines: int = 5):
-        #TODO: check that mine count does not exceed (rows*columns)-1
+    def _generate_board(self, rows:int = 10, columns: int = 10, mines: int = 20):
+        if rows*columns <= mines:
+            raise InvalidGameSettingsException(self.game, "Number of mines must be less than the total board size")
         self.game.rows = rows
         self.game.columns = columns
         self.game.mines_left = mines

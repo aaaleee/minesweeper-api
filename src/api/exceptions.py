@@ -8,3 +8,6 @@ class InvalidClearException(GameException):
 
 class GameNotFoundException(GameException):
     pass
+
+class InvalidGameSettingsException(GameException):
+    pass
