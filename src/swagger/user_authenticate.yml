@@ -1,0 +1,23 @@
+Authenticate a user
+---
+description: Grants a user token to access protected API endpoints
+parameters:
+  - schema:
+      $ref: '#/definitions/User'
+responses:
+  200:
+    description: User created
+    schema:
+      id: TokenGranted
+      properties:
+        token:
+          type: string
+          description: JSON web token
+  400:
+    description: Error message
+    schema:
+      $ref: '#/definitions/ErrorMessage'
+  401:
+    description: Auth problems.
+    schema:
+      $ref: '#/definitions/ErrorMessage'

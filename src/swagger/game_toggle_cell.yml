@@ -1,0 +1,52 @@
+Toggle a board cell
+---
+description: Toggles a board cell
+parameters:
+    - schema:
+        id: CellAction
+        required:
+          - row
+          - column
+        properties:
+          row:
+            type: int
+            description: 0 Index based board row
+          column:
+            type: int
+            description: 0 Index based board column        
+responses:
+  200:
+    description: Current Game state
+    schema:
+      id: GameState
+      properties:
+        id:
+          type: int
+          description: The game id
+        start_time:
+          type: DateTime
+          description: Timestamp of the moment when the first action was taken
+        end_time:
+          type: DateTime
+          description: Timestamp of the moment when the game ended
+        mines_left:
+          type: int
+          description: Total Mines on the field minus flags placed
+        status:
+          type: string
+          description: started, won, or lost, depending on the state of the game
+        board:
+          type: array
+          description: 2D array containing the state of the board, 0 and positive ints mean uncovered cells and the amount of adjacent mines. -1 is an uncovered mine. C means covered, F means flagged, ? means marked
+  400:
+    description: Error message
+    schema:
+      $ref: '#/definitions/ErrorMessage'
+  404:
+    description: Game not found
+    schema:
+      $ref: '#/definitions/ErrorMessage'
+  401:
+    description: Auth problems. Maybe the jwt token was not sent on x-access-tokens header
+    schema:
+      $ref: '#/definitions/ErrorMessage'

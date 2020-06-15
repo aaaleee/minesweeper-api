@@ -1,0 +1,37 @@
+
+Register a user
+---
+description: Adds a new user
+parameters:
+  - schema:
+    id: User
+    required:
+      - email
+      - password
+    properties:
+      email:
+        type: string
+        description: Email for user
+      password:
+        type: string
+        description: Password for user
+responses:
+  200:
+    description: User created
+    schema:
+      id: UserCreatedSchema
+      properties:
+        message:
+          type: string
+          description: Success message
+        user_data:
+          type: application/json
+          description: User information
+  400:
+    description: Error message
+    schema:
+      id: ErrorMessage
+      properties:
+        message: 
+          type: string
+          description: A human readable explanation of the problem

@@ -1,0 +1,24 @@
+Lists all games created by the current user
+---
+description: Lists all games created by the current user
+responses:
+  200:
+    description: Current Game state
+    schema:
+      id: GameList
+      properties:
+        id:
+          type: int
+          description: Game id
+        status:
+          type: string
+          description: Game status (started, won, or lost)
+          
+  400:
+    description: Error message
+    schema:
+      $ref: '#/definitions/ErrorMessage'
+  401:
+    description: Auth problems. Maybe the jwt token was not sent on x-access-tokens header
+    schema:
+      $ref: '#/definitions/ErrorMessage'

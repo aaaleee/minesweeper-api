@@ -1,0 +1,23 @@
+Uncovers/Clears a board cell
+---
+description: Uncovers/Clears a board cell
+parameters:
+    - schema:
+        $ref: '#/definitions/CellAction'
+responses:
+  200:
+    description: Current Game state
+    schema:
+      $ref: '#/definitions/GameState'
+  400:
+    description: Error message
+    schema:
+      $ref: '#/definitions/ErrorMessage'
+  404:
+    description: Game not found
+    schema:
+      $ref: '#/definitions/ErrorMessage'
+  401:
+    description: Authorization problems. Maybe the jwt token was not sent on x-access-tokens header
+    schema:
+      $ref: '#/definitions/ErrorMessage'

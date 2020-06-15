@@ -5,6 +5,7 @@ import jwt
 
 from flask import Flask, request, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
+from flask_swagger import swagger
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from os.path import join, dirname
@@ -58,6 +59,10 @@ def find_game(user_id: int, game_id: int):
 
 @app.route("/register", methods=["POST"])
 def register():
+   """
+   Add a user
+   swagger_from_file: src/swagger/user_register.yml
+   """
    data = request.get_json()
    schema = UserRegistration()
 
@@ -80,6 +85,10 @@ def register():
 
 @app.route("/authenticate", methods=["POST"])
 def authenticate():
+   """
+   Authenticate
+   swagger_from_file: src/swagger/user_authenticate.yml
+   """
    data = request.get_json()
    schema = Authentication()
 
@@ -99,6 +108,10 @@ def authenticate():
 @app.route("/games", methods=["POST"])
 @jwt_required
 def new_game(current_user):
+   """
+   Start a new game
+   swagger_from_file: src/swagger/game_start.yml
+   """
    service = GameService()
    service.start_game(current_user.id)
    db.session.add(service.game)
@@ -108,6 +121,10 @@ def new_game(current_user):
 @app.route("/games/<id>", methods=["GET"])
 @jwt_required
 def retrieve_game(current_user, id):
+   """
+   Retrieve an existing game
+   swagger_from_file: src/swagger/game_retrieve.yml
+   """
    try:
       game = find_game(current_user.id, id)
       service = GameService(game)
@@ -120,6 +137,10 @@ def retrieve_game(current_user, id):
 @app.route("/games", methods=["GET"])
 @jwt_required
 def list_games(current_user):
+   """
+   List existing games for the current user
+   swagger_from_file: src/swagger/game_list.yml
+   """
    games = Game.query.filter_by(user_id=current_user.id).all()
    all_games = []
    for game in games:
@@ -130,6 +151,10 @@ def list_games(current_user):
 @app.route("/games/<id>/clear", methods=["POST"])
 @jwt_required
 def clear(current_user, id):
+   """
+   Clear a cell
+   swagger_from_file: src/swagger/game_clear_cell.yml
+   """
    data = request.get_json()
    schema = CellAction()
    try:
@@ -158,6 +183,10 @@ def clear(current_user, id):
 @app.route("/games/<id>/toggle", methods=["POST"])
 @jwt_required
 def toggle(current_user, id):
+   """
+   Toggle a cell's status
+   swagger_from_file: src/swagger/game_toggle_cell.yml
+   """
    data = request.get_json()
    schema = CellAction()
    try:
@@ -181,3 +210,10 @@ def toggle(current_user, id):
       return {"message": exc.message}, 400
    
    return jsonify(service.encode_game_info())
+
+@app.route("/spec")
+def spec():
+    swag = swagger(app, from_file_keyword='swagger_from_file')
+    swag['info']['version'] = "1.0"
+    swag['info']['title'] = "Mine Sweeper API"
+    return jsonify(swag)

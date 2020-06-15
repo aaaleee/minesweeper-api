@@ -1,0 +1,20 @@
+Retrieves an existing game for the current user
+---
+description: Retrieves an existing game for the current user
+parameters:
+    - schema:
+        $ref: '#/definitions/CellAction'
+        
+responses:
+  200:
+    description: Current Game state
+    schema:
+      $ref: '#/definitions/GameState'
+  404:
+    description: Game not found
+    schema:
+      $ref: '#/definitions/ErrorMessage'
+  401:
+    description: Auth problems. Maybe the jwt token was not sent on x-access-tokens header
+    schema:
+      $ref: '#/definitions/ErrorMessage'
