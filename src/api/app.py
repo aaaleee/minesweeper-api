@@ -61,13 +61,24 @@ def find_game(user_id: int, game_id: int):
       raise GameNotFoundException(None, f"Game with ID {game_id} not found.")
    return game
 
+def update_game(user_id,game_id,game):
+   update_data = {
+         "start_time": game.start_time,
+         "end_time": game.end_time,
+         "board": game.board,
+         "status": game.status,
+         "mines_left": game.mines_left
+      }
+   db.session.query(Game).filter(and_(Game.id==game_id, Game.user_id==user_id)).update(update_data)
+   db.session.commit()
+
 @app.route("/register", methods=["POST"])
 def register():
    """
    Add a user
    swagger_from_file: src/swagger/user_register.yml
    """
-   data = request.get_json()
+   data = request.get_json(silent=True)
    schema = UserRegistration()
 
    try:
@@ -93,7 +104,7 @@ def authenticate():
    Authenticate
    swagger_from_file: src/swagger/user_authenticate.yml
    """
-   data = request.get_json()
+   data = request.get_json(silent=True)
    schema = Authentication()
 
    try:
@@ -116,7 +127,8 @@ def new_game(current_user):
    Start a new game
    swagger_from_file: src/swagger/game_start.yml
    """
-   data = request.get_json()
+
+   data = request.get_json(silent=True)
    schema = GameSettings()
 
    try:
@@ -175,7 +187,7 @@ def clear(current_user, id):
    Clear a cell
    swagger_from_file: src/swagger/game_clear_cell.yml
    """
-   data = request.get_json()
+   data = request.get_json(silent=True)
    schema = CellAction()
    try:
       game = find_game(current_user.id, id)
@@ -190,16 +202,7 @@ def clear(current_user, id):
    
    try:
       service.clear(coords["row"], coords["column"])
-      game = service.game
-      update_data = {
-         "start_time": game.start_time,
-         "end_time": game.end_time,
-         "board": game.board,
-         "status": game.status,
-         "mines_left": game.mines_left
-      }
-      db.session.query(Game).filter(and_(Game.id==id, Game.user_id==current_user.id)).update(update_data)
-      db.session.commit()
+      update_game(current_user.id, id, service.game)
    except InvalidClearException as exc:
       return jsonify({"message": str(exc)}), 400
    
@@ -213,7 +216,7 @@ def toggle(current_user, id):
    Toggle a cell's status
    swagger_from_file: src/swagger/game_toggle_cell.yml
    """
-   data = request.get_json()
+   data = request.get_json(silent=True)
    schema = CellAction()
    try:
       game = find_game(current_user.id, id)
@@ -228,10 +231,7 @@ def toggle(current_user, id):
    
    try:
       service.toggle(coords["row"], coords["column"])
-      st = service.game.start_time
-      board = service.game.board
-      db.session.query(Game).update({"start_time": st, "board": board})
-      db.session.commit()
+      update_game(current_user.id, id, service.game)
    except InvalidClearException as exc:
       return jsonify({"message": str(exc)}), 400
    

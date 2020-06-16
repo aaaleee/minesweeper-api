@@ -18,9 +18,9 @@ class GameService:
 
     def _is_cell_valid(self, row: int, column: int):
         if self.game.status != "started":
-            raise InvalidClearException(game, "Cannot clear cells on an inactive game")
+            raise InvalidClearException(self.game, "Cannot clear cells on an inactive game")
         if row not in range(self.game.rows) or column not in range(self.game.columns):
-            raise InvalidClearException(game, "Cannot clear cells outside of minefield")
+            raise InvalidClearException(self.game, "Cannot clear cells outside of minefield")
 
 
     def clear(self, row: int, column: int):
@@ -63,7 +63,15 @@ class GameService:
         values = ["C", "F", "?"]
         status = self.game.board[row][column]["status"]
         if status != "U":
-            self.game.board[row][column]["status"] = values[(values.index(status)+1) % len(values)]
+            new_status = values[(values.index(status)+1) % len(values)]
+            if status == "F":
+                self.game.mines_left += 1
+            if new_status=="F":
+                if self.game.mines_left>0:
+                    self.game.mines_left -= 1
+                else:
+                    new_status = "?"
+            self.game.board[row][column]["status"] = new_status
 
 
     def is_complete(self):
@@ -75,6 +83,8 @@ class GameService:
         
 
     def _generate_board(self, rows: int, columns: int, mines: int):
+        if rows>50 or columns>50:
+            raise InvalidGameSettingsException(self.game, "Sides cannot be greater thatn 50")
         if rows*columns <= mines:
             raise InvalidGameSettingsException(self.game, "Number of mines must be less than the total board size")
         if rows <= 0 or columns <= 0 or mines <= 0:
