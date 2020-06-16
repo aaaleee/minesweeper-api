@@ -5,6 +5,7 @@ import jwt
 
 from flask import Flask, request, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import and_
 from flask_swagger import swagger
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -55,7 +56,7 @@ def jwt_required(f):
    return decorator
 
 def find_game(user_id: int, game_id: int):
-   game = Game.query.filter_by(id=game_id, user_id=user_id).first()
+   game = Game.query.filter(and_(Game.id==game_id, Game.user_id==user_id)).first()
    if not game:
       raise GameNotFoundException(None, f"Game with ID {game_id} not found.")
    return game
@@ -130,11 +131,11 @@ def new_game(current_user):
    service = GameService()
    try:
       service.start_game(current_user.id, rows, columns, mines)
+      db.session.add(service.game)
+      db.session.commit()
    except InvalidGameSettingsException as exc:
-      jsonify(exc.message), 400
-
-   db.session.add(service.game)
-   db.session.commit()
+      return jsonify({"message": str(exc)}), 400
+   
    return jsonify(service.encode_game_info())
 
 @app.route("/games/<id>", methods=["GET"])
@@ -148,7 +149,7 @@ def retrieve_game(current_user, id):
       game = find_game(current_user.id, id)
       service = GameService(game)
    except GameNotFoundException as gnf:
-      return jsonify(gnf.message), 404
+      return jsonify({"message": str(gnf)}), 404
 
    return jsonify(service.encode_game_info())
 
@@ -180,7 +181,7 @@ def clear(current_user, id):
       game = find_game(current_user.id, id)
       service = GameService(game)
    except GameNotFoundException as gnf:
-      return jsonify(gnf.message), 404
+      return jsonify({"message": str(gnf)}), 404
 
    try:
       coords = schema.load(data)
@@ -189,12 +190,18 @@ def clear(current_user, id):
    
    try:
       service.clear(coords["row"], coords["column"])
-      st = service.game.start_time
-      board = service.game.board
-      db.session.query(Game).update({"start_time": st, "board": board})
+      game = service.game
+      update_data = {
+         "start_time": game.start_time,
+         "end_time": game.end_time,
+         "board": game.board,
+         "status": game.status,
+         "mines_left": game.mines_left
+      }
+      db.session.query(Game).filter(and_(Game.id==id, Game.user_id==current_user.id)).update(update_data)
       db.session.commit()
    except InvalidClearException as exc:
-      return {"message": exc.message}, 400
+      return jsonify({"message": str(exc)}), 400
    
    return jsonify(service.encode_game_info())
 
@@ -212,7 +219,7 @@ def toggle(current_user, id):
       game = find_game(current_user.id, id)
       service = GameService(game)
    except GameNotFoundException as gnf:
-      return jsonify(gnf.message), 404
+      return jsonify({"message": str(gnf)}), 404
 
    try:
       coords = schema.load(data)
@@ -226,7 +233,7 @@ def toggle(current_user, id):
       db.session.query(Game).update({"start_time": st, "board": board})
       db.session.commit()
    except InvalidClearException as exc:
-      return {"message": exc.message}, 400
+      return jsonify({"message": str(exc)}), 400
    
    return jsonify(service.encode_game_info())
 
