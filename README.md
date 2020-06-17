@@ -8,6 +8,8 @@ It accepts and responds with json data.
 
 For auth it uses JWT.
 
+I implemented a small command line version of minesweeper before starting with the API, it took me about 2/3 hours.
+
 
 #### Things implemented so far:
 
