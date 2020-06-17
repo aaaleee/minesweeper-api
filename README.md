@@ -8,6 +8,7 @@ It accepts and responds with json data.
 
 For auth it uses JWT.
 
+
 #### Things implemented so far:
 
 - A small Javascript client module: https://github.com/aaaleee/minesweeper-js/blob/master/minesweeper.js
@@ -29,12 +30,14 @@ You can interact with the API through a very barebones js implementation here: h
 There's a small http server and an API server both kept running using PM2 https://pm2.keymetrics.io/
 
 
-####
 
 #### What I would have done with more time
 
-- Use alembic for schema migrations, not needed for now but if any data structures need to change having something to handle migrations becomes fundamental
+- Use alembic for schema migrations, not needed for now but if any data structures need to change having something to handle migrations becomes fundamental.
 - More test coverage. Also, for this I tested some private methods in the game service, this was a quick workaround to eliminate the inherent randomness of the game from my testing but not really a pretty thing to see.
 - A not so barebones client lib and frontend using Vue.js
 - Separate API routes in flask blueprints. Not really necessary for this small project but nice to have.
-- Add Swagger UI
+- Add Swagger UI.
+- Replace SQLite with either a NoSQL solution or a more scalable DB engine like Postgres.
+- Improve the error messages a bit.
+- Some refactoring.
