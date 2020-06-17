@@ -41,3 +41,4 @@ There's a small http server and an API server both kept running using PM2 https:
 - Replace SQLite with either a NoSQL solution or a more scalable DB engine like Postgres.
 - Improve the error messages a bit.
 - Some refactoring.
+- Externalize strings to support i18n.
