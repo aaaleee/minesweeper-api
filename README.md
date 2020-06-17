@@ -25,6 +25,7 @@ I implemented a small command line version of minesweeper before starting with t
 
 The API server runs on a micro EC2 instance at http://18.191.41.216:5000
 
+API docs: http://18.191.41.216:8080/swagger.html
 To check the swagger json spec you can hit http://18.191.41.216:5000/spec
 
 You can interact with the API through a very barebones js implementation here: http://18.191.41.216:8080/sample.html
